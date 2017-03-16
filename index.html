@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>Codenected</title>
+
+</head>
+
+<body>
+	<textarea id="editor"></textarea>
+
+	<script src="/bower_components/codemirror/lib/codemirror.js"></script>
+	<link rel="stylesheet" href="/bower_components/codemirror/lib/codemirror.css">
+	<script src="/bower_components/codemirror/mode/javascript/javascript.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/bower_components/jquery/dist/jquery.min.js"></script>
+
+	<script>
+//Code Mirror 
+var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+        mode: 'gfm',
+        lineNumbers: true,
+        theme: "ambiance"
+      });
+</script>
+
+	<script>
+//Socket.IO connection
+var socket = io.connect();
+  socket.on('refresh', function (data) {
+    editor.setValue(data.body);
+  });
+  socket.on('change', function (data) {
+    console.log(data);
+    editor.replaceRange(data.text, data.from, data.to);
+  });
+  editor.on('change', function (i, op) {
+    console.log(op);
+    socket.emit('change', op);
+    socket.emit('refresh', editor.getValue());
+  });   
+  
+</script>
+</body>
+
+</html>
